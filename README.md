@@ -1,1 +1,2 @@
-# Weight loss tracking <https://cluffa.shinyapps.io/Weight-Loss-Trends/>
+# Weight loss tracking dashboard  
+<https://cluffa.shinyapps.io/Weight-Loss-Trends/>
