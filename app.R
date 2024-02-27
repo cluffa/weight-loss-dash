@@ -195,94 +195,11 @@ server <- function(input, output) {
     library(dplyr)
     library(ggplot2)
     library(lubridate)
-    library(readr)
     
-    KGCONST <- 0.4536 # lbs to kg
-    HEIGHT <- 188 # cm
-    AGE <- decimal_date(Sys.Date()) - decimal_date(as_date("1997-07-22"))
-    
-    mifflin <- function(weight, isMale = TRUE) {
-       (10 * weight * KGCONST) + (6.25 * HEIGHT) - (5 * AGE) + ifelse(isMale, 5, -161)
-    }
-    
-    # read in weight data
-    df <- read_csv(
-            "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1991942286&format=csv",
-            col_names = c("date", "weight"),
-            col_types = "cn---",
-            skip = 1,
-            lazy = TRUE
-        ) |> mutate(
-            date = as_datetime(date) |> force_tz(tzone = "EST")
-        ) |> arrange(
-            date
-        ) |> select(
-            date,
-            weight
-        )
-    
-    # read in losit data
-    loseit <- read_csv(
-            "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1838432377&format=csv",
-            skip = 1,
-            col_names = c("date", "budget", "food", "exercise", "net", "difference", "weight", "weighed", "garmin", "protein", "sugar", "goal_deficit"),
-            col_types = "c-nn--n-nnnn",
-        ) |> mutate(
-            date = as_datetime(date, format = "%m/%d/%y"),
-            food = if_else(food < 1100, NA_real_, food)
-        )
-    
-    # prepare data
-    get_loseit <- reactive({
-        out <- loseit |> mutate(
-                tdee = if_else(
-                    is.na(garmin),
-                    mifflin(weight) * 1.4,
-                    garmin
-                ),
-                diff = if_else(
-                    is.na(garmin),
-                    food - tdee - exercise,
-                    food - garmin
-                ),
-                tdee_method = if_else(
-                    is.na(garmin),
-                    "Mifflin-St Jeor",
-                    "Garmin"
-                )
-            )
-
-        
-        week <- out |>
-            mutate(
-                weekdate = floor_date(
-                    date,
-                    unit = "1 week",
-                    week_start = getOption("lubridate.week.start", 1)
-                )
-            ) |>
-            group_by(
-                weekdate
-            ) |>
-            reframe(
-                date = date,
-                diff = mean(diff, na.rm = TRUE)
-            ) |>
-            mutate(
-                diff = if_else(
-                    is.na(out$food),
-                    NA_real_,
-                    diff
-                    )
-            ) |>
-            select(
-                diff
-            )
-        
-        out$weekdiff <- week$diff
-        
-        return(out)
-    }) # |> bindCache(input$bfp, input$mult)
+    # read in data
+    source("data.R")
+    df <- get_weight()
+    loseit <- get_loseit()
     
     df_desc <- arrange(df, desc(date))
 
@@ -291,7 +208,6 @@ server <- function(input, output) {
         smooth.spline(df$date, df$weight, spar = input$smoothing)
     }) # |> bindCache(input$smoothing)
     
-
     pred <- reactive({
         rng_start <- floor_date(df$date[1], "days")
         rng_stop <- ceiling_date(tail(df$date, 1), "days")
@@ -299,7 +215,6 @@ server <- function(input, output) {
         predict(spl(), as.numeric(rng))
     }) # |> bindCache(spl())
     
-
     # wait for changes in the date range type, then show/hide the appropriate inputs
     observeEvent(input$drType, {
         type = input$drType
@@ -355,10 +270,9 @@ server <- function(input, output) {
     }) # |> bindCache(get_date_range())
     
     get_loseit_in_range <- reactive({
-        loseit <- get_loseit()
         range <- get_date_range()
         loseit[loseit$date >= range[1] & loseit$date <= range[2] + 86400,]
-    }) # |> bindCache(get_date_range(), get_loseit())
+    }) # |> bindCache(get_date_range())
     
     get_model <- reactive({
         shorten <- shorten()
@@ -615,7 +529,7 @@ server <- function(input, output) {
             "\nAvg Est. TDEE:", tdee_mean |> round(),
             "\nAvg Daily Diff Based on Intake:", mean(loseit$diff) |> round()
             )
-    }) # |> bindCache(get_loseit(), get_model(), get_gw(), input$model30, input$fitdays, input$mult)
+    }) # |> bindCache(get_model(), get_gw(), input$model30, input$fitdays, input$mult)
     
     output$stats <- renderPrint({
         df <- get_df() |> 
