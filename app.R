@@ -26,7 +26,7 @@ ui <- dashboardPage(
             actionBttn(
                 "test",
                 label = "View on Github",
-                onclick ="window.open('https://github.com/cluffa/MyShinyDashboards', '_blank')",
+                onclick ="window.open('https://github.com/cluffa/weight-loss-dash', '_blank')",
                 style = "simple",
                 color = "warning"
             ),
