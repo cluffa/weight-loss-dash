@@ -14,7 +14,7 @@ jobs:
     - uses: r-lib/actions/setup-renv@v2
     
     - name: Set shinyapps.io credentials
-      run: R -e '${{secrets.SHINYAPPS_TOKEN}}'
+      run: R -e 'rsconnect::setAccountInfo(name="cluffa", token="${{secrets.TOKEN}}", secret="${{secrets.SECRET}}")'
       
     - name: Deploy to shinyapps.io
       run: R -e 'deployApp(appDir = ".", forceUpdate = TRUE, launch.browser = FALSE)'
