@@ -17,4 +17,4 @@ jobs:
       run: R -e 'rsconnect::setAccountInfo(name="cluffa", token="${{secrets.TOKEN}}", secret="${{secrets.SECRET}}")'
       
     - name: Deploy to shinyapps.io
-      run: R -e 'deployApp(appDir = ".", forceUpdate = TRUE, launch.browser = FALSE)'
+      run: R -e 'rsconnect::deployApp(appDir = ".", forceUpdate = TRUE, launch.browser = FALSE)'
