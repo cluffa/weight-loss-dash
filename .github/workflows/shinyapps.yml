@@ -14,7 +14,10 @@ jobs:
       with:
         r-version: '4.3.2'
         
-    - uses: r-lib/actions/setup-renv@v2
+    # - uses: r-lib/actions/setup-renv@v2
+    
+    - name: Install rsconnect
+      run: R -e 'install.packages("rsconnect")'
     
     - name: Set shinyapps.io credentials
       run: R -e 'rsconnect::setAccountInfo(name="cluffa", token="${{secrets.TOKEN}}", secret="${{secrets.SECRET}}")'
