@@ -10,13 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Cache apt packages
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: gdebi-core qpdf devscripts ghostscript
-        version: 1.0
-  
     - uses: r-lib/actions/setup-r@v2
     - uses: r-lib/actions/setup-renv@v2
     
