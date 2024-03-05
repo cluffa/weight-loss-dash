@@ -11,7 +11,6 @@ GOALWEIGHT <- 185
 
 ui <- dashboardPage(
     title = "Weight Loss Tracking Dashboard",
-    tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico")),
     dashboardHeader(
         title = "Weight Loss Tracking Dashboard"
     ),
@@ -20,7 +19,8 @@ ui <- dashboardPage(
         tags$head(
             tags$style(
                 HTML(".sidebar { height: 90vh; overflow-y: auto; }")   
-            )
+            ),
+            tags$link(rel = "shortcut icon", href = "favicon.ico")
         ),
         fluidRow(
             style = "margin: 3px",
@@ -101,7 +101,7 @@ ui <- dashboardPage(
             ),
             awesomeCheckbox(
                 "model30",
-                value = TRUE,
+                value = FALSE,
                 label = "Fit Linear Model on Last 30 Days Only",
                 status = "primary"
             ),
