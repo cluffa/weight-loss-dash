@@ -11,6 +11,7 @@ GOALWEIGHT <- 185
 
 ui <- dashboardPage(
     title = "Weight Loss Tracking Dashboard",
+    tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico")),
     dashboardHeader(
         title = "Weight Loss Tracking Dashboard"
     ),

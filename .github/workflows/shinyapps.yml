@@ -1,4 +1,4 @@
-name: Push Weight-Loss-Trends to Shinyapps.io
+name: Push to Shinyapps.io
 
 on:
   push:
