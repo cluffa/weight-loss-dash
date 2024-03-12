@@ -515,14 +515,17 @@ server <- function(input, output) {
         tdee_mean <- mean(loseit$tdee)
         est_act <- (food_mean - cals)/(tdee_mean/input$mult)
         
+        trend <- ifelse(coef > 0, "Losing", "Gaining")
+        coef <- abs(coef)
+        
         cat(
             ifelse(
                 input$model30,
                 paste("Linear Model Fit on Last", input$fitdays, "days"),
                 "Linear Model Fit on Selected Date Range"
             ),
-            "\nDaily Trend:", ifelse(coef > 0, "Losing", "Gaining"), coef |> round(2) |> abs, "lbs/day",
-            "\nWeekly Trend:", ifelse(coef > 0, "Losing", "Gaining"), (coef*7) |> round(2) |> abs, "lbs/week",
+            "\nDaily Trend:", trend, coef |> round(2), "lbs/day",
+            "\nWeekly Trend:", trend, (coef*7) |> round(2), "lbs/week",
             "\nGoal Projection:", as.character(gwdate),
             paste0("(", as.character(weeks), " Weeks)"),
             "\nAvg Daily Diff Based on Trend:", round(cals, 0),
