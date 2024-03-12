@@ -398,7 +398,7 @@ server <- function(input, output) {
                 ) +
             theme_bw() +
             theme(
-                legend.position = c(0.18, 0.1),
+                legend.position = "bottom",
                 legend.background = element_rect(fill = "transparent")
                 )
         
