@@ -521,8 +521,8 @@ server <- function(input, output) {
                 paste("Linear Model Fit on Last", input$fitdays, "days"),
                 "Linear Model Fit on Selected Date Range"
             ),
-            "\nDaily Trend:", coef |> round(2), "lbs/day",
-            "\nWeekly Trend:", (coef*7) |> round(2), "lbs/week",
+            "\nDaily Trend:", ifelse(coef > 0, "Losing", "Gaining"), coef |> round(2) |> abs, "lbs/day",
+            "\nWeekly Trend:", ifelse(coef > 0, "Losing", "Gaining"), (coef*7) |> round(2) |> abs, "lbs/week",
             "\nGoal Projection:", as.character(gwdate),
             paste0("(", as.character(weeks), " Weeks)"),
             "\nAvg Daily Diff Based on Trend:", round(cals, 0),
