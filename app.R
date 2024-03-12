@@ -515,7 +515,7 @@ server <- function(input, output) {
         tdee_mean <- mean(loseit$tdee)
         est_act <- (food_mean - cals)/(tdee_mean/input$mult)
         
-        trend <- ifelse(coef > 0, "Losing", "Gaining")
+        trend <- ifelse(coef < 0, "Losing", "Gaining")
         coef <- abs(coef)
         
         cat(
