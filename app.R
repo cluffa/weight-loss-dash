@@ -309,12 +309,12 @@ server <- function(input, output) {
         loseit <- get_loseit_in_range()
         ylimits <- c(
             min(
-                quantile(remove_missing(loseit)$diff, 0.05),
-                min(loseit$weekdiff)
+                min(loseit$weekdiff, na.rm = TRUE),
+                min(df$cals, na.rm = TRUE)
             ),
             max(
-                quantile(remove_missing(loseit)$diff, 0.85),
-                max(loseit$weekdiff)
+                max(loseit$weekdiff, na.rm = TRUE),
+                max(df$cals, na.rm = TRUE)
             )
         )
 
