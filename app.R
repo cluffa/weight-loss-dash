@@ -326,6 +326,12 @@ server <- function(input, output) {
                 color = "lightgray",
                 alpha = 0.5
                 ) +
+            geom_smooth(
+                aes(date, diff),
+                data = loseit,
+                color = "lightgray",
+                alpha = 0.75
+                ) +
             geom_line(
                 aes(date, weekdiff, linetype = tdee_method),
                 data = loseit,
