@@ -326,7 +326,9 @@ server <- function(input, output) {
                 color = "lightgray",
                 alpha = 0.5
                 ) +
-            geom_smooth(
+            geom_line(
+                stat = "smooth",
+                method = lm,
                 aes(date, diff),
                 data = loseit,
                 color = "lightgray",
