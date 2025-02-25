@@ -2,7 +2,7 @@ library(readr)
 library(dplyr)
 library(lubridate)
 
-three_years_ago <- Sys.Date() - years(3)
+years_ago <- Sys.Date() - years(4)
 
 WEIGHT_URL <- "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1991942286&format=csv"
 LOSEIT_URL <- "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1838432377&format=csv"
@@ -17,7 +17,7 @@ get_weight <- function(url = WEIGHT_URL) {
     ) |>
     mutate(date = as_datetime(date) |>
     force_tz(tzone = "EST")) |>
-    filter(date >= three_years_ago) |>
+    filter(date >= years_ago) |>
     arrange(date) |>
     select(date, weight)
 }
@@ -44,16 +44,20 @@ get_loseit <- function(url = LOSEIT_URL) {
             "difference",
             "weight",
             "weighed",
+            "carbp",
+            "fatp",
             "garmin",
+            "proteinp",
             "protein",
             "sugar",
             "goal_deficit"
         ),
-        col_types = "c-nn--n-nnnn",
+        col_types = "c-nn--n-ccncnnn",
+        na = c("-")
     ) |> mutate(
         date = as_datetime(date, format = "%m/%d/%y") |> force_tz(tzone = "EST"),
     ) |> filter(
-        date >= three_years_ago
+        date >= years_ago
     ) |> mutate(
         food = if_else(food < 1100, NA_real_, food),
         tdee = if_else(is.na(garmin),
@@ -64,7 +68,10 @@ get_loseit <- function(url = LOSEIT_URL) {
                        food - garmin),
         tdee_method = if_else(is.na(garmin),
                               "Mifflin-St Jeor",
-                              "Garmin")
+                              "Garmin"),
+        carbp = as.numeric(parse_number(carbp)),
+        fatp = as.numeric(parse_number(fatp)),
+        proteinp = as.numeric(parse_number(proteinp))
     )
     
     week <- out |>
