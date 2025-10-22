@@ -73,7 +73,8 @@ ui <- dashboardPage(
                     `4 Years` = Sys.Date() - 1460
                 ),
                 # selected = c(`90 Days` = Sys.Date() - 90),
-                selected = c(`6 Months` = Sys.Date() - 180),
+                # selected = c(`6 Months` = Sys.Date() - 180),
+                selected = c(`3 Years` = Sys.Date() - 1095),
                 inline = TRUE
             ),
             dateRangeInput(

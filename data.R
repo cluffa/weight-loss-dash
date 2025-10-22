@@ -2,7 +2,9 @@ library(readr)
 library(dplyr)
 library(lubridate)
 
-years_ago <- Sys.Date() - years(4)
+# 2020-01-01
+START_DATE <- as_datetime("2020-01-01") |> force_tz(tzone = "EST")
+END_DATE <- as_datetime("2024-12-31") |> force_tz(tzone = "EST")
 
 WEIGHT_URL <- "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1991942286&format=csv"
 LOSEIT_URL <- "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1838432377&format=csv"
@@ -17,7 +19,7 @@ get_weight <- function(url = WEIGHT_URL) {
     ) |>
     mutate(date = as_datetime(date) |>
     force_tz(tzone = "EST")) |>
-    filter(date >= years_ago) |>
+    filter(date >= START_DATE & date <= END_DATE) |>
     arrange(date) |>
     select(date, weight)
 }
@@ -57,7 +59,7 @@ get_loseit <- function(url = LOSEIT_URL) {
     ) |> mutate(
         date = as_datetime(date, format = "%m/%d/%y") |> force_tz(tzone = "EST"),
     ) |> filter(
-        date >= years_ago
+        date >= START_DATE & date <= END_DATE
     ) |> mutate(
         food = if_else(food < 1100, NA_real_, food),
         tdee = if_else(is.na(garmin),
@@ -69,9 +71,9 @@ get_loseit <- function(url = LOSEIT_URL) {
         tdee_method = if_else(is.na(garmin),
                               "Mifflin-St Jeor",
                               "Garmin"),
-        carbp = as.numeric(parse_number(carbp)),
-        fatp = as.numeric(parse_number(fatp)),
-        proteinp = as.numeric(parse_number(proteinp))
+        # carbp = as.numeric(parse_number(carbp)),
+        # fatp = as.numeric(parse_number(fatp)),
+        # proteinp = as.numeric(parse_number(proteinp))
     )
     
     week <- out |>
