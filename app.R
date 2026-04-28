@@ -80,7 +80,7 @@ ui <- dashboardPage(
             dateRangeInput(
                 "drSelector",
                 label = "Date Range:",
-                start = as.Date("2023-01-01", "%Y-%m-%d"),
+                start = as.Date("2020-01-01", "%Y-%m-%d"),
                 end = Sys.Date()
             ),
             sliderInput(
@@ -115,6 +115,14 @@ ui <- dashboardPage(
                 # max = 90,
                 step = 5,
                 value = 30,
+            ),
+            numericInput(
+                "mult",
+                label = "TDEE Multiplier (Activity Factor):",
+                min = 1,
+                max = 2,
+                step = 0.05,
+                value = 1,
             )
         ),
         collapsed = FALSE
@@ -193,17 +201,15 @@ server <- function(input, output) {
     shinyjs::hide("drSelector")
     shinyjs::hide("drNum")
     shinyjs::hide("drUnit")
-    
-    #library(tidyverse)
+
     library(dplyr)
     library(ggplot2)
     library(lubridate)
-    
+
     # read in data
     source("data.R")
     df <- get_weight()
     loseit <- get_loseit()
-    
     df_desc <- arrange(df, desc(date))
 
     # create a spline
@@ -358,11 +364,12 @@ server <- function(input, output) {
     
     get_mm <- reactive({
         df <- get_df()
+        if (nrow(df) == 0) return(NULL)
         mm <- df[c(which.max(df$weight), which.min(df$weight)),]
         mm$label <- c("max", "min")
         
         return(mm)
-    }) # |> bindCache(get_df())
+    })
     
     output$plot1 <- renderPlot({
         shorten <- shorten()
@@ -444,7 +451,7 @@ server <- function(input, output) {
                 )
         }
         
-        if (input$showMM) {
+        if (input$showMM && !is.null(mm)) {
             p <- p +
                 geom_text(
                     aes(
@@ -513,8 +520,8 @@ server <- function(input, output) {
         gwdate <- as.Date(as.POSIXct.numeric(gwdate, origin = "1970-1-1"))
         weeks <- round((gwdate - Sys.Date()) / 7, 1)
         
-        food_mean <- mean(loseit$food)
-        tdee_mean <- mean(loseit$tdee)
+        food_mean <- mean(loseit$food, na.rm = TRUE)
+        tdee_mean <- mean(loseit$tdee, na.rm = TRUE)
         est_act <- (food_mean - cals)/(tdee_mean/input$mult)
         
         trend <- ifelse(coef < 0, "Losing", "Gaining")
@@ -533,7 +540,7 @@ server <- function(input, output) {
             "\nAvg Daily Diff Based on Trend:", round(cals, 0),
             "\nAvg Daily Intake:", food_mean |> round(),
             "\nAvg Est. TDEE:", tdee_mean |> round(),
-            "\nAvg Daily Diff Based on Intake:", mean(loseit$diff) |> round()
+            "\nAvg Daily Diff Based on Intake:", mean(loseit$diff, na.rm = TRUE) |> round()
             )
     }) # |> bindCache(get_model(), get_gw(), input$model30, input$fitdays, input$mult)
     

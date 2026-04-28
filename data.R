@@ -4,7 +4,7 @@ library(lubridate)
 
 # 2020-01-01
 START_DATE <- as_datetime("2020-01-01") |> force_tz(tzone = "EST")
-END_DATE <- as_datetime("2024-12-31") |> force_tz(tzone = "EST")
+END_DATE <- Sys.Date() |> as_datetime() |> force_tz(tzone = "EST")
 
 WEIGHT_URL <- "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1991942286&format=csv"
 LOSEIT_URL <- "https://docs.google.com/spreadsheets/d/151vhoZ-kZCnVfIQ7h9-Csq1rTMoIgsOsyj_vDRtDMn0/export?gid=1838432377&format=csv"
@@ -51,10 +51,11 @@ get_loseit <- function(url = LOSEIT_URL) {
             "garmin",
             "proteinp",
             "protein",
+            "steps",
             "sugar",
             "goal_deficit"
         ),
-        col_types = "c-nn--n-ccncnnn",
+        col_types = "c-nn--n-ccncnnnn",
         na = c("-")
     ) |> mutate(
         date = as_datetime(date, format = "%m/%d/%y") |> force_tz(tzone = "EST"),
@@ -76,21 +77,16 @@ get_loseit <- function(url = LOSEIT_URL) {
         # proteinp = as.numeric(parse_number(proteinp))
     )
     
-    week <- out |>
-        mutate(weekdate = floor_date(
+    out <- out |>
+        group_by(weekdate = floor_date(
             date,
             unit = "1 week",
             week_start = getOption("lubridate.week.start", 1)
         )) |>
-        group_by(weekdate) |>
-        reframe(date = date,
-                diff = mean(diff, na.rm = TRUE)) |>
-        mutate(diff = if_else(is.na(out$food),
-                              NA_real_,
-                              diff)) |>
-        select(diff)
-    
-    out$weekdiff <- week$diff
+        mutate(weekdiff = if_else(is.na(food),
+                                  NA_real_,
+                                  mean(diff, na.rm = TRUE))) |>
+        ungroup()
     
     return(out)
 }
